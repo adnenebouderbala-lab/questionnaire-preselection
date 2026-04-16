@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Questionnaire de présélection — Farmavans</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,800;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1B2A4A;
+  --navy-light: #2A3F6B;
+  --beige: #F5F0E8;
+  --beige-dark: #E8DFD0;
+  --orange: #E8732A;
+  --orange-light: #F09A5B;
+  --green: #2E7D5B;
+  --red: #C0392B;
+  --white: #FFFFFF;
+  --gray: #8A8A8A;
+  --shadow: 0 4px 24px rgba(27,42,74,0.12);
+  --shadow-lg: 0 12px 48px rgba(27,42,74,0.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--beige);color:var(--navy);min-height:100vh;overflow-x:hidden}
+.bg-pattern{position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 15% 20%,rgba(232,115,42,0.06) 0%,transparent 50%),radial-gradient(circle at 85% 80%,rgba(27,42,74,0.05) 0%,transparent 50%),radial-gradient(circle at 50% 50%,rgba(232,223,208,0.4) 0%,transparent 70%);pointer-events:none;z-index:0}
+.screen{display:none;position:relative;z-index:1}
+.screen.active{display:flex}
+
+/* ===== INTRO ===== */
+.intro-screen{min-height:100vh;align-items:center;justify-content:center;padding:2rem}
+.intro-card{background:var(--white);border-radius:24px;box-shadow:var(--shadow-lg);max-width:700px;width:100%;padding:3.5rem;text-align:center;animation:fadeUp .8s ease-out}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.intro-badge{display:inline-block;background:var(--navy);color:var(--beige);font-size:.7rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;padding:6px 18px;border-radius:50px;margin-bottom:1.5rem}
+.intro-card h1{font-family:'Fraunces',serif;font-weight:800;font-size:2rem;line-height:1.2;margin-bottom:.5rem;color:var(--navy)}
+.intro-card h1 span{color:var(--orange)}
+.intro-subtitle{font-size:.95rem;color:var(--gray);margin-bottom:2rem;line-height:1.7;text-align:left}
+.intro-sections{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
+.intro-section-card{background:var(--beige);border-radius:16px;padding:1.2rem 1rem;text-align:center;transition:transform .3s,box-shadow .3s}
+.intro-section-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(27,42,74,.08)}
+.section-icon{font-size:1.8rem;margin-bottom:.4rem;display:block}
+.section-label{font-weight:700;font-size:.73rem;text-transform:uppercase;letter-spacing:1px;color:var(--navy);margin-bottom:.2rem}
+.section-count{font-size:.7rem;color:var(--gray)}
+.intro-info{display:flex;justify-content:center;gap:2rem;margin-bottom:2rem;font-size:.85rem;color:var(--navy-light)}
+.intro-info div{display:flex;align-items:center;gap:.4rem}
+.intro-info svg{width:18px;height:18px;stroke:var(--orange)}
+.candidate-form{display:flex;flex-direction:column;gap:1rem;margin-bottom:1.5rem}
+.candidate-form input{padding:14px 20px;border:2px solid var(--beige-dark);border-radius:12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.95rem;background:var(--beige);color:var(--navy);transition:border-color .3s;outline:none}
+.candidate-form input:focus{border-color:var(--orange)}
+.candidate-form input::placeholder{color:var(--gray)}
+.input-error{border-color:var(--red)!important}
+.btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;background:var(--orange);color:var(--white);border:none;padding:16px 40px;border-radius:14px;font-family:'Plus Jakarta Sans',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:all .3s;box-shadow:0 4px 16px rgba(232,115,42,.3)}
+.btn-primary:hover{background:#D4651F;transform:translateY(-2px);box-shadow:0 6px 24px rgba(232,115,42,.4)}
+.btn-primary:disabled{background:var(--gray);cursor:not-allowed;box-shadow:none;transform:none}
+
+/* ===== QUIZ ===== */
+.quiz-screen{min-height:100vh;padding:1.5rem;flex-direction:column;align-items:center}
+.quiz-header{width:100%;max-width:820px;display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+.quiz-section-badge{display:flex;align-items:center;gap:.5rem;background:var(--navy);color:var(--beige);font-size:.72rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:8px 16px;border-radius:50px}
+.quiz-section-badge .badge-icon{font-size:1rem}
+.quiz-timer{display:flex;align-items:center;gap:.4rem;background:var(--white);padding:8px 16px;border-radius:50px;font-weight:600;font-size:.9rem;color:var(--navy);box-shadow:var(--shadow)}
+.quiz-timer.warning{color:var(--red);animation:pulse 1s infinite}
+.quiz-timer.hidden-timer{visibility:hidden}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.quiz-timer svg{width:18px;height:18px}
+.progress-container{width:100%;max-width:820px;margin-bottom:2rem}
+.progress-bar-bg{height:6px;background:var(--beige-dark);border-radius:3px;overflow:hidden}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--orange-light));border-radius:3px;transition:width .5s ease}
+.progress-label{display:flex;justify-content:space-between;font-size:.75rem;color:var(--gray);margin-top:.4rem}
+
+.question-card{background:var(--white);border-radius:24px;box-shadow:var(--shadow-lg);max-width:820px;width:100%;padding:2.5rem 3rem;transition:opacity .25s ease}
+.question-card.fading{opacity:0;transform:translateX(30px)}
+
+.question-number{font-family:'Fraunces',serif;font-weight:300;font-size:.85rem;color:var(--orange);margin-bottom:.6rem}
+.question-text{font-family:'Fraunces',serif;font-weight:600;font-size:1.25rem;line-height:1.5;color:var(--navy);margin-bottom:.4rem}
+.question-context{font-size:.83rem;color:var(--gray);line-height:1.6;margin-bottom:1.5rem;font-style:italic}
+
+/* Visual matrix */
+.visual-matrix{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:340px;margin:0 auto 1.8rem;background:var(--beige);padding:14px;border-radius:16px}
+.visual-matrix .cell{background:var(--white);border-radius:10px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;border:2px solid var(--beige-dark)}
+.visual-matrix .cell.missing{border:2px dashed var(--orange);background:#FFF8F3;position:relative}
+.visual-matrix .cell.missing::after{content:"?";font-family:'Fraunces',serif;font-weight:800;font-size:1.8rem;color:var(--orange);opacity:.4}
+.visual-matrix .cell svg{width:70%;height:70%}
+.visual-options{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1rem}
+.visual-option-btn{background:var(--beige);border:2px solid transparent;border-radius:14px;padding:12px;cursor:pointer;transition:all .25s;display:flex;flex-direction:column;align-items:center;gap:6px;aspect-ratio:1}
+.visual-option-btn:hover{border-color:var(--orange-light);background:#FFF8F3}
+.visual-option-btn.selected{border-color:var(--orange);background:#FFF3EB}
+.visual-option-btn svg{width:65%;height:65%}
+.visual-option-label{font-weight:700;font-size:.75rem;color:var(--navy);width:24px;height:24px;border-radius:6px;background:var(--white);display:flex;align-items:center;justify-content:center;border:1px solid var(--beige-dark)}
+.visual-option-btn.selected .visual-option-label{background:var(--orange);color:var(--white);border-color:var(--orange)}
+
+/* Text options */
+.options-list{display:flex;flex-direction:column;gap:.7rem;margin-bottom:1rem}
+.option-btn{display:flex;align-items:flex-start;gap:1rem;padding:1rem 1.2rem;background:var(--beige);border:2px solid transparent;border-radius:14px;cursor:pointer;transition:all .25s;text-align:left;font-family:'Plus Jakarta Sans',sans-serif;font-size:.9rem;line-height:1.5;color:var(--navy)}
+.option-btn:hover{border-color:var(--orange-light);background:#FFF8F3}
+.option-btn.selected{border-color:var(--orange);background:#FFF3EB}
+.option-letter{flex-shrink:0;width:30px;height:30px;border-radius:8px;background:var(--white);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;color:var(--navy);border:1px solid var(--beige-dark)}
+.option-btn.selected .option-letter{background:var(--orange);color:var(--white);border-color:var(--orange)}
+
+/* Free input */
+.free-input-container{margin-bottom:1rem}
+.free-input{display:flex;align-items:center;gap:.8rem}
+.free-input input{flex:1;padding:14px 20px;border:2px solid var(--beige-dark);border-radius:12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:1.1rem;font-weight:600;background:var(--beige);color:var(--navy);outline:none;transition:border-color .3s}
+.free-input input:focus{border-color:var(--orange)}
+.free-input-unit{font-weight:700;font-size:.85rem;color:var(--gray);white-space:nowrap}
+
+.quiz-nav{display:flex;justify-content:space-between;align-items:center;gap:1rem}
+.btn-back{background:none;border:2px solid var(--beige-dark);color:var(--navy);padding:10px 20px;border-radius:12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .3s;display:flex;align-items:center;gap:.3rem}
+.btn-back:hover{border-color:var(--navy)}
+.btn-back.invisible{visibility:hidden}
+.btn-next{background:var(--navy);color:var(--white);border:none;padding:12px 28px;border-radius:12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .3s}
+.btn-next:hover{background:var(--navy-light)}
+.btn-next:disabled{background:var(--beige-dark);color:var(--gray);cursor:not-allowed}
+
+/* ===== THANK YOU (candidate sees this) ===== */
+.thankyou-screen{min-height:100vh;align-items:center;justify-content:center;padding:2rem}
+.thankyou-card{background:var(--white);border-radius:24px;box-shadow:var(--shadow-lg);max-width:580px;width:100%;padding:3.5rem;text-align:center;animation:fadeUp .8s ease-out}
+.thankyou-icon{font-size:3.5rem;margin-bottom:1rem;display:block}
+.thankyou-card h2{font-family:'Fraunces',serif;font-weight:800;font-size:1.8rem;color:var(--navy);margin-bottom:.8rem}
+.thankyou-card p{font-size:.95rem;color:var(--gray);line-height:1.7;margin-bottom:1.5rem}
+
+/* ===== RESULTS (recruiter only) ===== */
+.results-screen{min-height:100vh;padding:2rem;align-items:center;justify-content:center}
+.results-card{background:var(--white);border-radius:24px;box-shadow:var(--shadow-lg);max-width:860px;width:100%;padding:3rem;animation:fadeUp .8s ease-out}
+.results-header{text-align:center;margin-bottom:2.5rem}
+.results-header h2{font-family:'Fraunces',serif;font-weight:800;font-size:1.8rem;color:var(--navy);margin-bottom:.3rem}
+.results-candidate{font-size:.9rem;color:var(--gray)}
+.score-global{text-align:center;margin-bottom:2.5rem}
+.score-circle-container{position:relative;width:180px;height:180px;margin:0 auto 1rem}
+.score-circle-bg,.score-circle-fill{fill:none;stroke-width:10}
+.score-circle-bg{stroke:var(--beige-dark)}
+.score-circle-fill{stroke:var(--orange);stroke-linecap:round;transform:rotate(-90deg);transform-origin:center;transition:stroke-dashoffset 1.5s ease}
+.score-circle-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.score-value{font-family:'Fraunces',serif;font-weight:800;font-size:2.8rem;color:var(--navy);line-height:1}
+.score-max{font-size:.8rem;color:var(--gray)}
+.score-verdict{font-family:'Fraunces',serif;font-weight:600;font-size:1.15rem;color:var(--navy)}
+.results-breakdown{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2.5rem}
+.breakdown-card{background:var(--beige);border-radius:16px;padding:1.5rem;text-align:center}
+.breakdown-icon{font-size:1.6rem;margin-bottom:.5rem}
+.breakdown-title{font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--navy);margin-bottom:.6rem}
+.breakdown-score{font-family:'Fraunces',serif;font-weight:800;font-size:1.8rem;margin-bottom:.2rem}
+.breakdown-pct{font-size:.8rem;color:var(--gray)}
+.breakdown-bar-bg{height:5px;background:var(--beige-dark);border-radius:3px;margin-top:.8rem;overflow:hidden}
+.breakdown-bar-fill{height:100%;border-radius:3px;transition:width 1.2s ease}
+.level-high{color:var(--green)}.level-mid{color:var(--orange)}.level-low{color:var(--red)}
+.bar-high{background:var(--green)}.bar-mid{background:var(--orange)}.bar-low{background:var(--red)}
+.profile-summary{background:var(--beige);border-radius:16px;padding:1.5rem 2rem;margin-bottom:2rem}
+.profile-summary h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.05rem;color:var(--navy);margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem .8rem}
+.profile-item{font-size:.85rem;line-height:1.4}
+.profile-item .label{color:var(--gray);font-size:.75rem}
+.profile-item .value{font-weight:600;color:var(--navy)}
+.results-detail{margin-bottom:2rem}
+.detail-section-title{font-family:'Fraunces',serif;font-weight:600;font-size:1.05rem;color:var(--navy);margin:1.5rem 0 .8rem;display:flex;align-items:center;gap:.5rem}
+.detail-row{display:flex;align-items:center;gap:.8rem;padding:.7rem 1rem;border-radius:10px;margin-bottom:.4rem;font-size:.85rem;line-height:1.4}
+.detail-correct{background:rgba(46,125,91,.08)}
+.detail-wrong{background:rgba(192,57,43,.08)}
+.detail-icon{flex-shrink:0;font-size:1rem}
+.results-actions{display:flex;justify-content:center;gap:1rem;flex-wrap:wrap}
+.btn-secondary{background:var(--beige);color:var(--navy);border:2px solid var(--beige-dark);padding:12px 28px;border-radius:12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .3s}
+.btn-secondary:hover{border-color:var(--navy)}
+
+/* Copy toast */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:var(--white);padding:12px 28px;border-radius:12px;font-size:.9rem;font-weight:600;opacity:0;transition:all .4s ease;z-index:999;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:640px){
+  .intro-card,.question-card,.results-card,.thankyou-card{padding:2rem 1.5rem}
+  .intro-sections,.results-breakdown{grid-template-columns:1fr}
+  .intro-card h1{font-size:1.5rem}
+  .question-text{font-size:1.05rem}
+  .intro-info{flex-direction:column;gap:.6rem;align-items:center}
+  .visual-matrix{max-width:260px}
+  .visual-options{grid-template-columns:repeat(2,1fr)}
+  .profile-grid{grid-template-columns:1fr}
+}
+@media print{
+  .bg-pattern,.results-actions,.toast{display:none}
+  .results-card{box-shadow:none}
+  body{background:white}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-pattern"></div>
+<div class="toast" id="toast"></div>
+
+<!-- ===== INTRO ===== -->
+<div id="introScreen" class="screen intro-screen active">
+  <div class="intro-card">
+    <div class="intro-badge">Offre d'emploi · Farmavans</div>
+    <h1>Questionnaire de <span>présélection</span></h1>
+    <p class="intro-subtitle">Répondez à ce questionnaire de présélection. Vos réponses sont confidentielles.<br><br>Ce questionnaire comporte deux parties :<br>
+    <strong>① Profil candidat</strong> — formation, expérience, disponibilité, prétentions salariales, statut CIVP.<br>
+    <strong>② Épreuves psychotechniques</strong> — questions de logique, raisonnement visuel (matrices), résolution de problèmes et intelligence situationnelle.</p>
+    <div class="intro-sections">
+      <div class="intro-section-card">
+        <span class="section-icon">📋</span>
+        <div class="section-label">Profil candidat</div>
+        <div class="section-count">9 questions</div>
+      </div>
+      <div class="intro-section-card">
+        <span class="section-icon">🧠</span>
+        <div class="section-label">Logique & raisonnement</div>
+        <div class="section-count">11 questions</div>
+      </div>
+      <div class="intro-section-card">
+        <span class="section-icon">🔧</span>
+        <div class="section-label">Résolution & intelligence situationnelle</div>
+        <div class="section-count">12 questions</div>
+      </div>
+    </div>
+    <div class="intro-info">
+      <div>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Réponses confidentielles
+      </div>
+    </div>
+    <div class="candidate-form">
+      <input type="text" id="candidateName" placeholder="Votre nom et prénom *" required>
+    </div>
+    <button class="btn-primary" onclick="startQuiz()">
+      Commencer le questionnaire
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ===== QUIZ ===== -->
+<div id="quizScreen" class="screen quiz-screen">
+  <div class="quiz-header">
+    <div class="quiz-section-badge">
+      <span class="badge-icon" id="sectionIcon">📋</span>
+      <span id="sectionName">Profil candidat</span>
+    </div>
+    <div class="quiz-timer hidden-timer" id="timer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span id="timerText">30:00</span>
+    </div>
+  </div>
+  <div class="progress-container">
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
+    <div class="progress-label"><span id="progressText">Question 1 / 32</span><span id="progressPct">0%</span></div>
+  </div>
+  <div class="question-card" id="questionCard">
+    <div class="question-number" id="questionNumber"></div>
+    <div class="question-text" id="questionText"></div>
+    <div class="question-context" id="questionContext"></div>
+    <div id="visualArea"></div>
+    <div class="options-list" id="optionsList"></div>
+    <div class="quiz-nav">
+      <button class="btn-back invisible" id="backBtn" onclick="prevQuestion()">← Précédent</button>
+      <button class="btn-next" id="nextBtn" onclick="handleNext()" disabled>Suivant →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== THANK YOU (candidate sees this) ===== -->
+<div id="thankyouScreen" class="screen thankyou-screen">
+  <div class="thankyou-card">
+    <span class="thankyou-icon">✅</span>
+    <h2>Merci pour vos réponses !</h2>
+    <p>Votre questionnaire a bien été enregistré. Nous reviendrons vers vous dans les meilleurs délais.<br><br>Vous pouvez fermer cette page.</p>
+    <div class="intro-badge" style="margin-top:1rem">Farmavans — Recrutement</div>
+  </div>
+</div>
+
+<!-- ===== RESULTS (recruiter opens via #results link) ===== -->
+<div id="resultsScreen" class="screen results-screen">
+  <div class="results-card" id="resultsCard"></div>
+</div>
+
+<script>
+// ==================== SVG HELPERS ====================
+const SH={
+  circle:(cx,cy,r,fill,stroke="#1B2A4A",sw=2)=>`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>`,
+  rect:(x,y,w,h,fill,stroke="#1B2A4A",sw=2)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>`,
+  tri:(pts,fill,stroke="#1B2A4A",sw=2)=>`<polygon points="${pts}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>`,
+  wrap:(inner)=>`<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`
+};
+const C={red:"#E8732A",blue:"#3B82F6",green:"#2E7D5B",purple:"#8B5CF6",yellow:"#F59E0B",navy:"#1B2A4A",none:"none"};
+
+// ==================== ALL QUESTIONS ====================
+const allQuestions = [
+  // ═══ PROFIL CANDIDAT (9) ═══
+  {section:"profile",sectionLabel:"Profil candidat",icon:"📋",type:"text",scored:false,text:"Quel est votre niveau d'études le plus élevé obtenu ?",context:"",options:["Bac+3 (Licence)","Bac+4 (Master 1 / Maîtrise)","Bac+5 (Master 2, Ingénieur, Grande École)","Au-delà de Bac+5 (Doctorat, MBA…)"],profileKey:"diplome"},
+  {section:"profile",sectionLabel:"Profil candidat",icon:"📋",type:"text",scored:false,text:"Votre formation est principalement orientée vers quel domaine ?",context:"",options:["Gestion / Management des organisations","Commerce International / Supply Chain / Logistique","Finance / Comptabilité / Contrôle de gestion","Autre domaine"],profileKey:"domaine"},
+  {section:"profile",sectionLabel:"Profil candidat",icon:"📋",type:"text",scored:false,text:"Combien d'années d'expérience professionnelle avez-vous (hors stages) ?",context:"",options:["Aucune — diplômé(e) récent(e)","Moins d'1 an","Entre 1 et 3 ans","Entre 3 et 5 ans","Plus de 5 ans"],profileKey:"experience"},
+  {section:"profile",sectionLabel:"Profil candidat",icon:"📋",type:"text",scored:false,text:"Dans quel secteur avez-vous exercé principalement ?",context:"",options:["Santé / Pharma / Cosmétique / Nutrition","Industrie / Agroalimentaire / Manufacture","Logistique / Transport / Commerce international","Services / Tertiaire / Conseil","Autre secteur"],profileKey:"secteur"},
+  {section:"profile",sectionLabel:"Profil candidat",icon:"📋",type:"text",scored:false,text:"Quelle est votre tranche d'âge ?",context:"",options:["Moins de 25 ans","25 à 29 ans","30 à 34 ans","35 ans et plus"],profileKey:"age"},
+  {section:"profile",sectionLabel:"Profil candidat",icon:"📋",type:"text",scored:false,text:"Avez-vous déjà bénéficié d'un contrat CIVP (Contrat d'Insertion à la Vie Professionnelle) ?",context:"",options:["Non — je n'ai jamais bénéficié d'un CIVP","Oui — j'ai déjà bénéficié d'un CIVP","Je ne sais pas / Non concerné(e)"],profileKey:"civp"},
+  {section:"profile",sectionLabel:"Profil candidat",icon:"📋",type:"text",scored:false,text:"Quelle est votre disponibilité pour prendre le poste ?",context:"",options:["Disponible immédiatement","Préavis d'1 mois","Préavis de 2 mois","Préavis de 3 mois ou plus"],profileKey:"disponibilite"},
+  {section:"profile",sectionLabel:"Profil candidat",icon:"📋",type:"free_input",scored:false,text:"Quelle est votre prétention salariale mensuelle nette minimale (en TND) ?",context:"Indiquez votre prétention mensuelle nette minimale acceptable.",inputUnit:"TND / mois net",inputPlaceholder:"Ex : 1 500",profileKey:"salaire"},
+  {section:"profile",sectionLabel:"Profil candidat",icon:"📋",type:"text",scored:false,text:"Cette prétention salariale est-elle négociable ?",context:"",options:["Oui, je suis ouvert(e) à la discussion","Non, c'est mon minimum non négociable","Selon les avantages (mutuelle, primes, tickets repas…)"],profileKey:"negociable"},
+
+  // ═══ LOGIQUE — TEXTE (5) — correct: C,B,C,A,D ═══
+  {section:"logic",sectionLabel:"Logique & Raisonnement",icon:"🧠",type:"text",scored:true,text:"Si tous les employés du département A suivent la formation X, et que Sami fait partie du département A, laquelle de ces conclusions est certaine ?",context:"",options:["Sami est le meilleur du département","Sami va être promu grâce à la formation","Sami a suivi la formation X","Sami a choisi la formation X"],correct:2,explanation:"Syllogisme : si tous les A ont X, tout membre de A a X."},
+  {section:"logic",sectionLabel:"Logique & Raisonnement",icon:"🧠",type:"text",scored:true,text:"Complétez la séquence : 2, 6, 18, 54, …",context:"Identifiez le pattern mathématique.",options:["108","162","148","216"],correct:1,explanation:"Suite géométrique ×3 : 54 × 3 = 162."},
+  {section:"logic",sectionLabel:"Logique & Raisonnement",icon:"🧠",type:"text",scored:true,text:"Un projet planifié pour 20 jours a pris 30% de temps en plus. Combien de jours a-t-il réellement duré ?",context:"",options:["23 jours","24 jours","26 jours","30 jours"],correct:2,explanation:"20 + (30% × 20) = 26 jours."},
+  {section:"logic",sectionLabel:"Logique & Raisonnement",icon:"🧠",type:"text",scored:true,text:"Les caisses rouges contiennent toujours des pièces métalliques. Les bleues n'en contiennent jamais. Vous trouvez une pièce métallique. Que déduisez-vous avec certitude ?",context:"",options:["Elle ne vient pas d'une caisse bleue","Elle vient forcément d'une caisse rouge","Elle vient d'une rouge ou d'une bleue","On ne peut rien déduire"],correct:0,explanation:"Les bleues n'ont JAMAIS de pièces métalliques → certitude qu'elle ne vient pas d'une bleue."},
+  {section:"logic",sectionLabel:"Logique & Raisonnement",icon:"🧠",type:"text",scored:true,text:"Trois candidats A, B et C passent un entretien. A est meilleur que B. C est moins bon que B. Qui est classé deuxième ?",context:"",options:["Candidat A","Candidat C","Impossible à déterminer","Candidat B"],correct:3,explanation:"A > B > C → B est deuxième."},
+
+  // ═══ LOGIQUE — VISUELLES (6) — correct: C,A,D,B,A,C ═══
+  {section:"logic",sectionLabel:"Logique & Raisonnement",icon:"🧠",type:"visual",scored:true,text:"Quelle forme complète la matrice ?",context:"Observez l'évolution des formes, couleurs et tailles ligne par ligne.",
+    matrix:[SH.wrap(SH.circle(40,40,25,C.red)),SH.wrap(SH.circle(40,40,18,C.red)),SH.wrap(SH.circle(40,40,11,C.red)),SH.wrap(SH.rect(18,18,44,44,C.blue)),SH.wrap(SH.rect(22,22,36,36,C.blue)),SH.wrap(SH.rect(27,27,26,26,C.blue)),SH.wrap(SH.tri("40,12 68,60 12,60",C.green)),SH.wrap(SH.tri("40,18 62,56 18,56",C.green)),null],
+    visualOptions:[SH.wrap(SH.tri("40,30 50,50 30,50",C.red)),SH.wrap(SH.rect(27,27,26,26,C.green)),SH.wrap(SH.tri("40,25 56,52 24,52",C.green)),SH.wrap(SH.circle(40,40,11,C.green))],
+    correct:2,explanation:"Chaque ligne : même forme, même couleur, taille décroissante → petit triangle vert (C)."},
+  {section:"logic",sectionLabel:"Logique & Raisonnement",icon:"🧠",type:"visual",scored:true,text:"Quelle forme complète la matrice ?",context:"Analysez les formes et les couleurs dans chaque ligne et chaque colonne.",
+    matrix:[SH.wrap(SH.circle(40,40,22,C.red)),SH.wrap(SH.rect(18,18,44,44,C.red)),SH.wrap(SH.tri("40,12 68,60 12,60",C.red)),SH.wrap(SH.circle(40,40,22,C.blue)),SH.wrap(SH.rect(18,18,44,44,C.blue)),SH.wrap(SH.tri("40,12 68,60 12,60",C.blue)),SH.wrap(SH.circle(40,40,22,C.green)),SH.wrap(SH.rect(18,18,44,44,C.green)),null],
+    visualOptions:[SH.wrap(SH.tri("40,12 68,60 12,60",C.green)),SH.wrap(SH.circle(40,40,22,C.green)),SH.wrap(SH.tri("40,12 68,60 12,60",C.red)),SH.wrap(SH.rect(18,18,44,44,C.green))],
+    correct:0,explanation:"Lignes : même couleur. Colonnes : même forme → triangle vert (A)."},
+  {section:"logic",sectionLabel:"Logique & Raisonnement",icon:"🧠",type:"visual",scored:true,text:"Quelle forme complète la matrice ?",context:"Observez comment le nombre d'éléments évolue.",
+    matrix:[SH.wrap(SH.circle(40,40,16,C.navy)),SH.wrap(SH.circle(28,40,12,C.navy)+SH.circle(52,40,12,C.navy)),SH.wrap(SH.circle(22,40,10,C.navy)+SH.circle(40,40,10,C.navy)+SH.circle(58,40,10,C.navy)),SH.wrap(SH.rect(28,28,24,24,C.purple)),SH.wrap(SH.rect(16,28,20,20,C.purple)+SH.rect(44,28,20,20,C.purple)),SH.wrap(SH.rect(8,28,17,17,C.purple)+SH.rect(31,28,17,17,C.purple)+SH.rect(55,28,17,17,C.purple)),SH.wrap(SH.tri("40,20 56,56 24,56",C.yellow)),SH.wrap(SH.tri("28,22 40,56 16,56",C.yellow)+SH.tri("52,22 64,56 40,56",C.yellow)),null],
+    visualOptions:[SH.wrap(SH.tri("40,20 56,56 24,56",C.yellow)),SH.wrap(SH.tri("28,22 40,56 16,56",C.yellow)+SH.tri("52,22 64,56 40,56",C.yellow)),SH.wrap(SH.circle(22,40,10,C.yellow)+SH.circle(40,40,10,C.yellow)+SH.circle(58,40,10,C.yellow)),SH.wrap(SH.tri("20,20 30,54 10,54",C.yellow)+SH.tri("40,20 50,54 30,54",C.yellow)+SH.tri("60,20 70,54 50,54",C.yellow))],
+    correct:3,explanation:"Progression 1→2→3 éléments par ligne → 3 triangles jaunes (D)."},
+  {section:"logic",sectionLabel:"Logique & Raisonnement",icon:"🧠",type:"visual",scored:true,text:"Quelle forme complète la matrice ?",context:"Attention à la rotation des formes.",
+    matrix:[SH.wrap(SH.tri("40,10 70,65 10,65",C.blue)),SH.wrap(SH.tri("10,15 70,15 40,65",C.blue)),SH.wrap(SH.tri("15,10 15,65 65,40",C.blue)),SH.wrap(SH.tri("40,10 70,65 10,65",C.red)),SH.wrap(SH.tri("10,15 70,15 40,65",C.red)),SH.wrap(SH.tri("15,10 15,65 65,40",C.red)),SH.wrap(SH.tri("40,10 70,65 10,65",C.green)),SH.wrap(SH.tri("10,15 70,15 40,65",C.green)),null],
+    visualOptions:[SH.wrap(SH.tri("65,10 65,65 15,40",C.green)),SH.wrap(SH.tri("15,10 15,65 65,40",C.green)),SH.wrap(SH.tri("40,10 70,65 10,65",C.green)),SH.wrap(SH.tri("15,10 15,65 65,40",C.red))],
+    correct:1,explanation:"Même couleur par ligne, rotation haut→bas→droite → triangle vert pointant à droite (B)."},
+  {section:"logic",sectionLabel:"Logique & Raisonnement",icon:"🧠",type:"visual",scored:true,text:"Quelle forme complète la matrice ?",context:"Observez la combinaison forme extérieure + forme intérieure.",
+    matrix:[SH.wrap(SH.circle(40,40,28,C.none)+SH.rect(30,30,20,20,C.red)),SH.wrap(SH.circle(40,40,28,C.none)+SH.circle(40,40,11,C.blue)),SH.wrap(SH.circle(40,40,28,C.none)+SH.tri("40,26 52,50 28,50",C.green)),SH.wrap(SH.rect(14,14,52,52,C.none)+SH.rect(30,30,20,20,C.red)),SH.wrap(SH.rect(14,14,52,52,C.none)+SH.circle(40,40,11,C.blue)),SH.wrap(SH.rect(14,14,52,52,C.none)+SH.tri("40,26 52,50 28,50",C.green)),SH.wrap(SH.tri("40,8 72,64 8,64",C.none)+SH.rect(30,34,20,20,C.red)),SH.wrap(SH.tri("40,8 72,64 8,64",C.none)+SH.circle(40,42,11,C.blue)),null],
+    visualOptions:[SH.wrap(SH.tri("40,8 72,64 8,64",C.none)+SH.tri("40,30 52,54 28,54",C.green)),SH.wrap(SH.tri("40,8 72,64 8,64",C.none)+SH.rect(30,34,20,20,C.green)),SH.wrap(SH.circle(40,40,28,C.none)+SH.tri("40,26 52,50 28,50",C.green)),SH.wrap(SH.tri("40,8 72,64 8,64",C.none)+SH.circle(40,42,11,C.green))],
+    correct:0,explanation:"Lignes : même conteneur. Colonnes : même forme intérieure → grand triangle + petit triangle vert (A)."},
+  {section:"logic",sectionLabel:"Logique & Raisonnement",icon:"🧠",type:"visual",scored:true,text:"Quelle forme complète la matrice ?",context:"Observez le remplissage : plein, hachuré, vide.",
+    matrix:[SH.wrap(SH.circle(40,40,24,C.navy)),SH.wrap(`<defs><pattern id="h1" width="6" height="6" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="6" y2="6" stroke="${C.navy}" stroke-width="1.2"/></pattern></defs><circle cx="40" cy="40" r="24" fill="url(#h1)" stroke="${C.navy}" stroke-width="2"/>`),SH.wrap(SH.circle(40,40,24,C.none)),SH.wrap(SH.rect(16,16,48,48,C.navy)),SH.wrap(`<defs><pattern id="h2" width="6" height="6" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="6" y2="6" stroke="${C.navy}" stroke-width="1.2"/></pattern></defs><rect x="16" y="16" width="48" height="48" fill="url(#h2)" stroke="${C.navy}" stroke-width="2"/>`),SH.wrap(SH.rect(16,16,48,48,C.none)),SH.wrap(SH.tri("40,10 70,65 10,65",C.navy)),SH.wrap(`<defs><pattern id="h3" width="6" height="6" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="6" y2="6" stroke="${C.navy}" stroke-width="1.2"/></pattern></defs><polygon points="40,10 70,65 10,65" fill="url(#h3)" stroke="${C.navy}" stroke-width="2"/>`),null],
+    visualOptions:[SH.wrap(SH.tri("40,10 70,65 10,65",C.navy)),SH.wrap(`<defs><pattern id="h4" width="6" height="6" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="6" y2="6" stroke="${C.navy}" stroke-width="1.2"/></pattern></defs><polygon points="40,10 70,65 10,65" fill="url(#h4)" stroke="${C.navy}" stroke-width="2"/>`),SH.wrap(SH.tri("40,10 70,65 10,65",C.none)),SH.wrap(SH.circle(40,40,24,C.none))],
+    correct:2,explanation:"Colonnes : plein → hachuré → vide → triangle vide (C)."},
+
+  // ═══ RÉSOLUTION (6) — correct: D,C,A,B,D,C ═══
+  {section:"problem",sectionLabel:"Résolution de Problèmes",icon:"🔧",type:"text",scored:true,text:"Votre fournisseur principal annonce une rupture de stock qui bloquera votre production dans 5 jours. Quelle est votre première action ?",context:"Vous êtes responsable de la chaîne d'approvisionnement.",options:["Attendre que le fournisseur résolve le problème","Réduire la production de moitié dès aujourd'hui","Informer la direction et attendre ses instructions","Identifier et contacter immédiatement des fournisseurs alternatifs"],correct:3,explanation:"Sécuriser une alternative concrète est la priorité en gestion de crise."},
+  {section:"problem",sectionLabel:"Résolution de Problèmes",icon:"🔧",type:"text",scored:true,text:"Vous devez réduire les coûts de 15% sans licencier. Quelle approche est la plus structurée ?",context:"",options:["Couper tous les budgets uniformément de 15%","Supprimer le budget formation et les avantages sociaux","Analyser chaque poste, identifier les inefficiences, puis prioriser par impact","Demander à chaque employé de proposer des économies"],correct:2,explanation:"L'audit + priorisation coupe intelligemment sans détruire la valeur."},
+  {section:"problem",sectionLabel:"Résolution de Problèmes",icon:"🔧",type:"text",scored:true,text:"Un client important menace de partir après 3 livraisons en retard. Quelle réponse est la plus efficace ?",context:"",options:["S'excuser, expliquer la cause racine, présenter un plan correctif avec délais","Lui offrir une remise de 20%","Transférer au directeur commercial","Rappeler que d'autres fournisseurs ont les mêmes problèmes"],correct:0,explanation:"Transparence + plan d'action restaure la confiance."},
+  {section:"problem",sectionLabel:"Résolution de Problèmes",icon:"🔧",type:"text",scored:true,text:"Vous héritez d'un projet en retard de 3 semaines, équipe démotivée, client qui attend dans 2 semaines. Par quoi commencez-vous ?",context:"",options:["Imposer des heures supplémentaires","Diagnostiquer les causes, redéfinir les priorités, négocier un périmètre réaliste","Reprendre depuis le début","Remplacer les moins performants"],correct:1,explanation:"Diagnostiquer avant d'agir, puis aligner périmètre et réalité."},
+  {section:"problem",sectionLabel:"Résolution de Problèmes",icon:"🔧",type:"text",scored:true,text:"Un processus interne prend 4h/jour mais pourrait être automatisé. Budget limité. Que faites-vous ?",context:"",options:["Demander à l'équipe de travailler plus vite","Externaliser le processus","Continuer en attendant un meilleur budget","Chiffrer le coût du temps perdu vs. automatisation et bâtir un business case"],correct:3,explanation:"Quantifier le problème débloque les ressources."},
+  {section:"problem",sectionLabel:"Résolution de Problèmes",icon:"🔧",type:"text",scored:true,text:"Solution A : 90% de chances de rapporter 10 000 DT. Solution B : 40% de chances de rapporter 30 000 DT. Laquelle a la meilleure espérance ?",context:"Valeur attendue = probabilité × gain.",options:["Elles sont équivalentes","Solution A (espérance : 9 000 DT)","Solution B (espérance : 12 000 DT)","Impossible à calculer"],correct:2,explanation:"A=9000, B=12000. B est meilleure."},
+
+  // ═══ INTELLIGENCE SITUATIONNELLE (6) — correct: C,B,D,A,B,A ═══
+  {section:"emotional",sectionLabel:"Intelligence Situationnelle",icon:"💡",type:"text",scored:true,text:"Un collègue critique votre travail devant toute l'équipe en réunion. Quelle est la meilleure réaction ?",context:"",options:["Défendre votre travail point par point immédiatement","Critiquer son travail en retour","Écouter calmement, prendre note, puis proposer d'en discuter en privé","Ignorer complètement la remarque"],correct:2,explanation:"Accuser réception sans escalader, puis traiter en privé."},
+  {section:"emotional",sectionLabel:"Intelligence Situationnelle",icon:"💡",type:"text",scored:true,text:"Vous devez annoncer à votre équipe que le bonus annuel est annulé. Comment procédez-vous ?",context:"L'équipe a travaillé dur et s'y attend.",options:["Envoyer un email factuel","Réunir l'équipe, reconnaître leur déception, expliquer les raisons, proposer des perspectives","Repousser l'annonce le plus longtemps possible","Minimiser l'importance du bonus"],correct:1,explanation:"Reconnaissance + transparence + perspective."},
+  {section:"emotional",sectionLabel:"Intelligence Situationnelle",icon:"💡",type:"text",scored:true,text:"Un collaborateur habituellement performant a une baisse de productivité depuis 2 semaines. Que faites-vous ?",context:"",options:["Lui envoyer un rappel sur ses objectifs","Le comparer à ses collègues pour le motiver","Attendre que ça se résolve","L'inviter à un échange informel pour comprendre la situation"],correct:3,explanation:"L'empathie active est la clé."},
+  {section:"emotional",sectionLabel:"Intelligence Situationnelle",icon:"💡",type:"text",scored:true,text:"En négociation, votre interlocuteur devient agressif. Quelle stratégie ?",context:"",options:["Baisser le ton, reformuler sa position, recentrer sur les intérêts communs","Céder sur tous les points","Élever la voix aussi","Quitter la négociation"],correct:0,explanation:"Dé-escalation + reformulation + recentrage."},
+  {section:"emotional",sectionLabel:"Intelligence Situationnelle",icon:"💡",type:"text",scored:true,text:"Vous commettez une erreur coûteuse pour l'entreprise. Quelle approche ?",context:"",options:["Corriger discrètement sans en parler","Informer votre supérieur, assumer la responsabilité, proposer un plan de correction","Trouver quelqu'un à qui attribuer l'erreur","Attendre que quelqu'un s'en aperçoive"],correct:1,explanation:"Intégrité + proactivité."},
+  {section:"emotional",sectionLabel:"Intelligence Situationnelle",icon:"💡",type:"text",scored:true,text:"Deux membres de votre équipe sont en conflit ouvert depuis une semaine. Comment intervenez-vous ?",context:"",options:["Rencontrer chacun individuellement puis organiser une médiation structurée","Les laisser régler entre eux","Les séparer sur des projets différents","Prendre le parti de celui qui a raison"],correct:0,explanation:"Écoute bilatérale + médiation structurée."}
+];
+
+// ==================== STATE ====================
+let cur = 0, answers = [], timerInterval = null, totalSeconds = 30*60, timerStarted = false, candidateName = "", profileData = {}, advancing = false;
+
+// ==================== CHECK URL FOR RESULTS MODE ====================
+(function checkResultsMode(){
+  const hash = window.location.hash;
+  if (hash.startsWith("#results=")) {
+    try {
+      const data = JSON.parse(decodeURIComponent(atob(hash.slice(9))));
+      document.getElementById("introScreen").classList.remove("active");
+      document.getElementById("resultsScreen").classList.add("active");
+      renderResultsFromData(data);
+    } catch(e) { console.error("Invalid results data"); }
+  }
+})();
+
+// ==================== START ====================
+function startQuiz() {
+  candidateName = document.getElementById("candidateName").value.trim();
+  if (!candidateName) { document.getElementById("candidateName").classList.add("input-error"); document.getElementById("candidateName").focus(); return; }
+  document.getElementById("introScreen").classList.remove("active");
+  document.getElementById("quizScreen").classList.add("active");
+  answers = new Array(allQuestions.length).fill(null);
+  cur = 0;
+  window.scrollTo(0,0);
+  renderQuestion();
+}
+
+// ==================== TIMER ====================
+function startTimer() {
+  if (timerStarted) return;
+  timerStarted = true;
+  document.getElementById("timer").classList.remove("hidden-timer");
+  timerInterval = setInterval(() => {
+    totalSeconds--;
+    if (totalSeconds <= 0) { clearInterval(timerInterval); finishQuiz(); return; }
+    const m = Math.floor(totalSeconds/60), s = totalSeconds%60;
+    document.getElementById("timerText").textContent = `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+    if (totalSeconds <= 120) document.getElementById("timer").classList.add("warning");
+  }, 1000);
+}
+
+// ==================== RENDER (no animation on same card) ====================
+function renderQuestion() {
+  const q = allQuestions[cur];
+  const total = allQuestions.length;
+  const pct = Math.round(((cur+1)/total)*100);
+
+  if (q.scored && !timerStarted) startTimer();
+  if (!q.scored) document.getElementById("timer").classList.add("hidden-timer");
+
+  document.getElementById("sectionIcon").textContent = q.icon;
+  document.getElementById("sectionName").textContent = q.sectionLabel;
+  document.getElementById("progressBar").style.width = pct+"%";
+  document.getElementById("progressText").textContent = `Question ${cur+1} / ${total}`;
+  document.getElementById("progressPct").textContent = pct+"%";
+  document.getElementById("questionNumber").textContent = `Question ${cur+1}`;
+  document.getElementById("questionText").textContent = q.text;
+  document.getElementById("questionContext").textContent = q.context||"";
+  document.getElementById("questionContext").style.display = q.context?"block":"none";
+
+  const va = document.getElementById("visualArea");
+  const ol = document.getElementById("optionsList");
+
+  if (q.type==="visual") {
+    let mh='<div class="visual-matrix">';
+    q.matrix.forEach(c=>{mh+=c===null?'<div class="cell missing"></div>':`<div class="cell">${c}</div>`;});
+    mh+='</div>';
+    const L=["A","B","C","D"];
+    let oh='<div class="visual-options">';
+    q.visualOptions.forEach((o,i)=>{
+      const sel=answers[cur]===i?"selected":"";
+      oh+=`<button class="visual-option-btn ${sel}" onclick="selectOption(${i})">${o}<span class="visual-option-label">${L[i]}</span></button>`;
+    });
+    oh+='</div>';
+    va.innerHTML=mh; ol.innerHTML=oh;
+  } else if (q.type==="free_input") {
+    va.innerHTML="";
+    ol.innerHTML=`<div class="free-input-container"><div class="free-input"><input type="number" id="freeInput" placeholder="${q.inputPlaceholder}" value="${answers[cur]||''}" oninput="onFreeInput(this.value)" onkeydown="if(event.key==='Enter')handleNext()" min="0" step="100"><span class="free-input-unit">${q.inputUnit}</span></div></div>`;
+    setTimeout(()=>document.getElementById("freeInput")?.focus(),100);
+  } else {
+    va.innerHTML="";
+    const L=["A","B","C","D","E"];
+    let oh="";
+    q.options.forEach((o,i)=>{
+      const sel=answers[cur]===i?"selected":"";
+      oh+=`<button class="option-btn ${sel}" onclick="selectOption(${i})"><span class="option-letter">${L[i]}</span><span>${o}</span></button>`;
+    });
+    ol.innerHTML=oh;
+  }
+
+  document.getElementById("backBtn").classList.toggle("invisible",cur===0);
+  const answered=answers[cur]!==null&&answers[cur]!=="";
+  document.getElementById("nextBtn").disabled=!answered;
+  document.getElementById("nextBtn").textContent=cur===total-1?"Terminer →":"Suivant →";
+}
+
+// ==================== SELECT & ADVANCE ====================
+function selectOption(i) {
+  if (advancing) return;
+  answers[cur] = i;
+  const q = allQuestions[cur];
+  if (q.profileKey && q.type!=="free_input") profileData[q.profileKey] = q.options[i];
+
+  // Update visual state without full re-render
+  highlightSelected(i, q.type);
+
+  // Auto-advance with smooth fade
+  if (cur < allQuestions.length - 1) {
+    advancing = true;
+    const card = document.getElementById("questionCard");
+    card.style.transition = "opacity .2s ease, transform .2s ease";
+    card.style.opacity = "0";
+    card.style.transform = "translateX(20px)";
+    setTimeout(() => {
+      cur++;
+      renderQuestion();
+      card.style.opacity = "1";
+      card.style.transform = "translateX(0)";
+      window.scrollTo({top:0,behavior:'smooth'});
+      setTimeout(()=>{ advancing=false; },200);
+    }, 250);
+  } else {
+    document.getElementById("nextBtn").disabled = false;
+    document.getElementById("nextBtn").textContent = "Terminer →";
+  }
+}
+
+function highlightSelected(idx, type) {
+  if (type==="visual") {
+    document.querySelectorAll(".visual-option-btn").forEach((b,i)=>{
+      b.classList.toggle("selected",i===idx);
+      b.querySelector(".visual-option-label")?.classList?.toggle("selected",i===idx);
+    });
+  } else {
+    document.querySelectorAll(".option-btn").forEach((b,i)=>{
+      b.classList.toggle("selected",i===idx);
+    });
+  }
+}
+
+function onFreeInput(val) {
+  answers[cur]=val;
+  document.getElementById("nextBtn").disabled=!val||val.trim()==="";
+}
+
+function handleNext() {
+  if (advancing) return;
+  const a=answers[cur];
+  if (a===null||a==="") return;
+  const q=allQuestions[cur];
+  if (q.profileKey) {
+    if (q.type==="free_input") profileData[q.profileKey]=a+" TND";
+    else if (!profileData[q.profileKey]) profileData[q.profileKey]=q.options[a];
+  }
+  if (cur<allQuestions.length-1) {
+    advancing=true;
+    const card=document.getElementById("questionCard");
+    card.style.transition="opacity .2s ease, transform .2s ease";
+    card.style.opacity="0";
+    card.style.transform="translateX(20px)";
+    setTimeout(()=>{
+      cur++;
+      renderQuestion();
+      card.style.opacity="1";
+      card.style.transform="translateX(0)";
+      window.scrollTo({top:0,behavior:'smooth'});
+      setTimeout(()=>{advancing=false;},200);
+    },250);
+  } else {
+    finishQuiz();
+  }
+}
+
+function prevQuestion() {
+  if (advancing||cur===0) return;
+  advancing=true;
+  const card=document.getElementById("questionCard");
+  card.style.transition="opacity .2s ease, transform .2s ease";
+  card.style.opacity="0";
+  card.style.transform="translateX(-20px)";
+  setTimeout(()=>{
+    cur--;
+    renderQuestion();
+    card.style.opacity="1";
+    card.style.transform="translateX(0)";
+    window.scrollTo({top:0,behavior:'smooth'});
+    setTimeout(()=>{advancing=false;},200);
+  },250);
+}
+
+// ==================== GOOGLE SHEETS CONFIG ====================
+// ⚠️ REMPLACEZ cette URL par l'URL de votre Web App Google Apps Script
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxvPY0VEscZhFC0Bqk7u6ky9MbRuD2pttAlUASML3lVtk0ZCxfGodtKhx-_3Oy0YIjA/exec";
+
+// ==================== FINISH ====================
+function finishQuiz() {
+  clearInterval(timerInterval);
+
+  // Build results data
+  const sections={logic:{total:0,correct:0},problem:{total:0,correct:0},emotional:{total:0,correct:0}};
+  allQuestions.forEach((q,i)=>{if(!q.scored)return;sections[q.section].total++;if(answers[i]===q.correct)sections[q.section].correct++;});
+  const timeUsed=30*60-totalSeconds;
+  const resultsData={
+    name:candidateName,
+    date:new Date().toISOString(),
+    timeUsed,
+    profile:profileData,
+    sections,
+    answers:answers.map((a,i)=>{const q=allQuestions[i];if(!q.scored)return null;return{section:q.section,type:q.type,answer:a,correct:q.correct,ok:a===q.correct};}).filter(Boolean)
+  };
+
+  // Show thank you to candidate immediately
+  document.getElementById("quizScreen").classList.remove("active");
+  document.getElementById("thankyouScreen").classList.add("active");
+  window.scrollTo({top:0,behavior:'smooth'});
+
+  // Send to Google Sheets silently
+  if (GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL !== "VOTRE_URL_GOOGLE_APPS_SCRIPT_ICI") {
+    fetch(GOOGLE_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(resultsData)
+    }).then(() => {
+      console.log("✅ Résultats envoyés vers Google Sheets");
+    }).catch(err => {
+      console.error("❌ Erreur envoi Google Sheets:", err);
+    });
+  } else {
+    console.warn("⚠️ URL Google Apps Script non configurée. Les résultats ne sont pas envoyés.");
+    console.log("📋 Données:", JSON.stringify(resultsData, null, 2));
+  }
+
+  // Also encode in URL for backup access
+  const encoded = btoa(encodeURIComponent(JSON.stringify(resultsData)));
+  const resultsUrl = window.location.origin + window.location.pathname + "#results=" + encoded;
+  console.log("📊 Lien résultats (backup):", resultsUrl);
+}
+
+// ==================== RENDER RESULTS (recruiter view) ====================
+function renderResultsFromData(d) {
+  const sLabels={logic:{label:"Logique & Raisonnement",icon:"🧠"},problem:{label:"Résolution de Problèmes",icon:"🔧"},emotional:{label:"Intelligence Situationnelle",icon:"💡"}};
+  const totalCorrect=Object.values(d.sections).reduce((s,v)=>s+v.correct,0);
+  const totalScored=Object.values(d.sections).reduce((s,v)=>s+v.total,0);
+  const globalPct=Math.round((totalCorrect/totalScored)*100);
+  let verdict="";
+  if(globalPct>=85)verdict="Excellent — Profil à fort potentiel";
+  else if(globalPct>=70)verdict="Très bien — Bonnes capacités globales";
+  else if(globalPct>=50)verdict="Correct — Axes de développement identifiés";
+  else verdict="À renforcer — Accompagnement recommandé";
+
+  const circ=2*Math.PI*75;
+  const offset=circ*(1-globalPct/100);
+  const mU=Math.floor(d.timeUsed/60),sU=d.timeUsed%60;
+  const dateStr=new Date(d.date).toLocaleDateString("fr-FR");
+
+  const profileLabels={diplome:"Diplôme",domaine:"Domaine de formation",experience:"Expérience",secteur:"Secteur",age:"Tranche d'âge",civp:"Statut CIVP",disponibilite:"Disponibilité",salaire:"Prétention salariale",negociable:"Négociable"};
+
+  let profileHtml='<div class="profile-summary"><h3>📋 Profil candidat</h3><div class="profile-grid">';
+  Object.entries(d.profile||{}).forEach(([k,v])=>{profileHtml+=`<div class="profile-item"><div class="label">${profileLabels[k]||k}</div><div class="value">${v}</div></div>`;});
+  profileHtml+='</div></div>';
+
+  let html=`<div class="results-header"><h2>Résultats — Présélection</h2><p class="results-candidate">${d.name} · ${dateStr} · Temps psychotechnique : ${mU}m ${sU}s</p></div>${profileHtml}<div class="score-global"><div class="score-circle-container"><svg viewBox="0 0 180 180" width="180" height="180"><circle class="score-circle-bg" cx="90" cy="90" r="75"/><circle class="score-circle-fill" cx="90" cy="90" r="75" stroke-dasharray="${circ}" stroke-dashoffset="${circ}" id="scoreCircle"/></svg><div class="score-circle-text"><div class="score-value">${totalCorrect}</div><div class="score-max">/ ${totalScored}</div></div></div><div class="score-verdict">${verdict}</div></div><div class="results-breakdown">`;
+
+  Object.entries(d.sections).forEach(([key,s])=>{
+    const p=Math.round((s.correct/s.total)*100);
+    const lc=p>=70?"level-high":p>=50?"level-mid":"level-low";
+    const bc=p>=70?"bar-high":p>=50?"bar-mid":"bar-low";
+    const info=sLabels[key];
+    html+=`<div class="breakdown-card"><div class="breakdown-icon">${info.icon}</div><div class="breakdown-title">${info.label}</div><div class="breakdown-score ${lc}">${s.correct} / ${s.total}</div><div class="breakdown-pct">${p}%</div><div class="breakdown-bar-bg"><div class="breakdown-bar-fill ${bc}" style="width:0%" data-target="${p}"></div></div></div>`;
+  });
+
+  html+='</div><div class="results-detail">';
+  let curSec="",qNum=0;
+  d.answers.forEach(a=>{
+    qNum++;
+    if(a.section!==curSec){curSec=a.section;const info=sLabels[a.section];html+=`<div class="detail-section-title">${info.icon} ${info.label}</div>`;}
+    const ic=a.ok?"✅":"❌",cls=a.ok?"detail-correct":"detail-wrong";
+    const L=["A","B","C","D","E"];
+    let txt=`Q${qNum}${a.type==="visual"?" (visuelle)":""}: `;
+    if(a.ok){txt+="Bonne réponse";}
+    else{txt+=`Réponse ${a.answer!==null?L[a.answer]:"—"} — Bonne réponse : ${L[a.correct]}`;}
+    html+=`<div class="detail-row ${cls}"><span class="detail-icon">${ic}</span><span>${txt}</span></div>`;
+  });
+
+  html+=`</div><div class="results-actions"><button class="btn-secondary" onclick="window.print()">🖨️ Imprimer</button></div>`;
+
+  document.getElementById("resultsCard").innerHTML=html;
+  setTimeout(()=>{document.getElementById("scoreCircle").style.strokeDashoffset=offset;},300);
+  setTimeout(()=>{document.querySelectorAll(".breakdown-bar-fill").forEach(b=>b.style.width=b.dataset.target+"%");},500);
+}
+
+// ==================== TOAST ====================
+function showToast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),3000);}
+</script>
+</body>
+</html>
